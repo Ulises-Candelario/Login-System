@@ -98,6 +98,7 @@ node -e "const bcrypt = require('bcryptjs'); bcrypt.hash('admin123', 12).then(co
  ```
 ---
  ## ESTRUCTURA DEL PROYECTO
+ ```bash
  📂 login-node
  ┣ 📂 public
  ┃ ┣ 📄 login.html
@@ -114,4 +115,4 @@ node -e "const bcrypt = require('bcryptjs'); bcrypt.hash('admin123', 12).then(co
  ┣ 📄 .env
  ┣ 📄 .gitignore
  ┗ 📄 package.json
-
+```
