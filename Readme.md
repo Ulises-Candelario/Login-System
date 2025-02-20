@@ -30,17 +30,23 @@ Sigue estos pasos para instalar y configurar el proyecto en tu máquina:
 ### 1️⃣ **Clonar el repositorio**
 ```bash
 git clone https://github.com/Ulises-Candelario/Login-System.git
-cd Login-System
+cd Login-System 
+```
 ---
 
-## *Instalar dependencias*
+### *Instalar dependencias*
+```bash
 npm install
-
+```
 ---
 ## Configurar el archivo .env
+
 Crea un archivo llamado .env en la raíz del proyecto y agrega lo siguiente:
+
 ---
+
 ## Configuración de la Base de Datos
+```bash
 DB_HOST='TU HOST'
 DB_USER='USUARIO'
 DB_PASS='PASSWORD'  # Asegúrate de cambiar esta contraseña en producción
@@ -52,11 +58,12 @@ JWT_EXPIRATION='1h'
 
 # Puerto del Servidor
 PORT=3000
+```
 
 ---
-##CONFIGURAR LA BASE DE DATOS
+## CONFIGURAR LA BASE DE DATOS
 Ejecuta el siguiente query en MySQL para crear la base de datos y la tabla de usuarios:
-
+```bash
 CREATE DATABASE login_system;
 USE login_system;
 
@@ -68,25 +75,29 @@ CREATE TABLE users (
     status ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- Insertar usuario admin (La contraseña debe ser reemplazada con un hash seguro)
+```
+## Insertar usuario admin (La contraseña debe ser reemplazada con un hash seguro)
+```bash
 INSERT INTO users (username, password_hash, role, status) 
 VALUES ('admin', '$2b$12$ReemplazarConHashSeguro', 'admin', 'activo');
-
+```
 ---
-##CAMBIAR CONTRASENA DEL ADMIN
+## CAMBIAR CONTRASENA DEL ADMIN
 Debido a que las contraseñas se almacenan como hashes bcrypt, no se pueden modificar directamente. Usa este comando en Node.js para generar un hash seguro:
-
+```bash
 node -e "const bcrypt = require('bcryptjs'); bcrypt.hash('admin123', 12).then(console.log);"
-
+```
  Copia el hash generado y actualiza la base de datos con este query:
-
+```bash
  UPDATE users SET password_hash = 'tuhash' WHERE username = 'admin';
+```
 ---
- ##EJECUTAR EL SERVIDOR
+ ## EJECUTAR EL SERVIDOR
+ ```bash
  npm start
+ ```
 ---
- ##ESTRUCTURA DEL PROYECTO
+ ## ESTRUCTURA DEL PROYECTO
  📂 login-node
  ┣ 📂 public
  ┃ ┣ 📄 login.html
