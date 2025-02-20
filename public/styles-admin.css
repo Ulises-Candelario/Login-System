@@ -1,0 +1,143 @@
+/* 🔹 Estilo General */
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to bottom, #f4e1e1, #e1d0c5);
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+    animation: fadeIn 0.8s ease-in-out;
+    overflow-x: hidden;
+    user-select: none; /* Evita selección de texto innecesaria */
+}
+
+/* 🔹 Contenedor Principal */
+.admin-container {
+    background: rgba(255, 255, 255, 0.98);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 95%;
+    max-width: 850px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: all 0.3s ease-in-out;
+}
+
+/* 🔹 Efecto sutil al pasar el mouse */
+.admin-container:hover {
+    transform: scale(1.01);
+}
+
+/* 🔹 Título */
+h2 {
+    color: #b45f5f;
+    font-size: 26px;
+    margin-bottom: 15px;
+}
+
+/* 🔹 Contenedor de la tabla */
+.table-container {
+    overflow-x: auto;
+    width: 100%;
+}
+
+/* 🔹 Tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* 🔹 Estilos para encabezados y celdas */
+th, td {
+    padding: 12px;
+    border: 1px solid #d0a8a8;
+    text-align: center;
+}
+
+th {
+    background: #b45f5f;
+    color: white;
+    font-weight: bold;
+}
+
+td {
+    background: #ffffff;
+}
+
+/* 🔹 Input de Edición */
+input {
+    width: 85%;
+    padding: 6px;
+    border: 1px solid #d0a8a8;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s ease-in-out;
+}
+
+input:focus {
+    border-color: #8a3d3d;
+    box-shadow: 0 0 5px rgba(138, 61, 61, 0.5);
+}
+
+/* 🔹 Botones */
+button {
+    background: #b45f5f;
+    color: white;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out, transform 0.1s ease-in-out;
+    font-weight: bold;
+    outline: none;
+}
+
+button:hover {
+    background: #8a3d3d;
+    transform: translateY(-2px);
+}
+
+button:focus {
+    outline: 2px solid #5a2525;
+}
+
+/* 🔹 Botón de Cerrar Sesión */
+.logout-button {
+    width: 160px;
+    background: #8a3d3d;
+}
+
+.logout-button:hover {
+    background: #5a2525;
+}
+
+/* 🔹 Estilos Responsivos */
+@media screen and (max-width: 768px) {
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+
+    button {
+        padding: 8px 12px;
+    }
+}
+
+/* 🔹 Animación de Entrada */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+}

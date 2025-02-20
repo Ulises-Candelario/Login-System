@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="styles-admin.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <!-- 🔹 Configuración de Seguridad -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+</head>
+<body>
+    <h2>Administración de Usuarios</h2>
+    <p id="error-message" class="error-message"></p>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="users"></tbody>
+    </table>
+
+    <div class="button-group">
+        <button id="logout-btn">Cerrar Sesión</button>
+    </div>
+
+    <!-- 🔹 Script externo -->
+    <script src="/js/admin.js"></script>
+</body>
+</html>
