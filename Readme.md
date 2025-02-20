@@ -31,14 +31,14 @@ Sigue estos pasos para instalar y configurar el proyecto en tu máquina:
 ```bash
 git clone https://github.com/Ulises-Candelario/Login-System.git
 cd Login-System
-
+---
 ## Instalar dependencias
 npm install
-
-##Configurar el archivo .env
+---
+## Configurar el archivo .env
 Crea un archivo llamado .env en la raíz del proyecto y agrega lo siguiente:
-
-# Configuración de la Base de Datos
+---
+## Configuración de la Base de Datos
 DB_HOST='TU HOST'
 DB_USER='USUARIO'
 DB_PASS='PASSWORD'  # Asegúrate de cambiar esta contraseña en producción
@@ -51,7 +51,7 @@ JWT_EXPIRATION='1h'
 # Puerto del Servidor
 PORT=3000
 
-
+---
 ##CONFIGURAR LA BASE DE DATOS
 Ejecuta el siguiente query en MySQL para crear la base de datos y la tabla de usuarios:
 
@@ -71,7 +71,7 @@ CREATE TABLE users (
 INSERT INTO users (username, password_hash, role, status) 
 VALUES ('admin', '$2b$12$ReemplazarConHashSeguro', 'admin', 'activo');
 
-
+---
 ##CAMBIAR CONTRASENA DEL ADMIN
 Debido a que las contraseñas se almacenan como hashes bcrypt, no se pueden modificar directamente. Usa este comando en Node.js para generar un hash seguro:
 
@@ -80,10 +80,10 @@ node -e "const bcrypt = require('bcryptjs'); bcrypt.hash('admin123', 12).then(co
  Copia el hash generado y actualiza la base de datos con este query:
 
  UPDATE users SET password_hash = 'tuhash' WHERE username = 'admin';
-
+---
  ##EJECUTAR EL SERVIDOR
  npm start
-
+---
  ##ESTRUCTURA DEL PROYECTO
  📂 login-node
  ┣ 📂 public
