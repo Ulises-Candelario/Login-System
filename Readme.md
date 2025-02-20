@@ -32,8 +32,10 @@ Sigue estos pasos para instalar y configurar el proyecto en tu máquina:
 git clone https://github.com/Ulises-Candelario/Login-System.git
 cd Login-System
 ---
-## Instalar dependencias
+
+## *Instalar dependencias*
 npm install
+
 ---
 ## Configurar el archivo .env
 Crea un archivo llamado .env en la raíz del proyecto y agrega lo siguiente:
