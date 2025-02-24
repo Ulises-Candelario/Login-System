@@ -21,7 +21,6 @@ async function login() {
     }
 
     try {
-
         const response = await fetch("http://localhost:3000/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -30,34 +29,50 @@ async function login() {
 
         const data = await response.json();
 
-        console.log("🔹 Respuesta del servidor:", data);
-
         if (!response.ok) {
-            console.warn("⚠️ Error al iniciar sesión:", data.error);
             document.getElementById("error-message").innerText = data.error;
             return;
         }
 
-        console.log("✅ Login exitoso, almacenando token...");
+        // Mostrar campo para ingresar el código 2FA
+        document.getElementById("2fa-section").style.display = "block";
+        document.getElementById("container").style.display = "none";
 
-        const expirationTime = Date.now() + 60 * 60 * 1000; // 1 hora
+        document.getElementById("verify-2fa-btn").addEventListener("click", async () => {
+            const token = document.getElementById("2fa-token").value.trim();
 
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.role);
-        localStorage.setItem("token_expiration", expirationTime);
+            if (token === "") {
+                document.getElementById("error-message").innerText = "El código 2FA es obligatorio.";
+                return;
+            }
 
-        console.log("🔹 Token expira en:", new Date(expirationTime));
+            const verifyResponse = await fetch("http://localhost:3000/verify-2fa", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, token }),
+            });
 
-        // Redirigir según el rol
-        if (data.role === "admin") {
-            window.location.href = "admin.html";
-        } else {
-            window.location.href = "user.html";
-        }
+            const verifyData = await verifyResponse.json();
+
+            if (!verifyResponse.ok) {
+                document.getElementById("error-message").innerText = verifyData.error;
+                return;
+            }
+
+            // Almacenar el JWT en localStorage
+            localStorage.setItem("token", verifyData.token);
+            localStorage.setItem("role", verifyData.role);
+
+            // Redirigir según el rol
+            if (verifyData.role === "admin") {
+                window.location.href = "admin.html";
+            } else {
+                window.location.href = "user.html";
+            }
+        });
 
     } catch (error) {
-        console.error("❌ Error en la solicitud de login:", error);
-        document.getElementById("error-message").innerText = "No se pudo conectar con el servidor.";
+        document.getElementById("error-message").innerText = error;
     }
 }
 

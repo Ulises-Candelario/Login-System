@@ -8,6 +8,8 @@ const rateLimit = require("express-rate-limit");
 const sanitizeHtml = require("sanitize-html");
 const db = require("./db");
 const path = require("path");
+const speakeasy = require("speakeasy");
+const transporter = require("./mailer");
 
 const app = express();
 app.use(express.json());
@@ -68,7 +70,7 @@ app.get("/", (req, res) => {
 // 📌 **Obtener todos los usuarios**
 app.get("/users", async (req, res) => {
     try {
-        const [results] = await db.query("SELECT id, username, role, status FROM users");
+        const [results] = await db.query("SELECT id, username, email, role, status FROM users");
         res.json(results);
     } catch (err) {
         console.error("❌ [SERVER] Error al obtener usuarios:", err);
@@ -78,11 +80,12 @@ app.get("/users", async (req, res) => {
 
 // 📌 **Editar usuario**
 app.post("/edit-user", async (req, res) => {
-    const { userId, newUsername } = req.body;
+    const { userId, newUsername, newEmail } = req.body;
     const sanitizedUsername = sanitizeHtml(newUsername, { allowedTags: [], allowedAttributes: {} });
+    const sanitizedEmail = sanitizeHtml(newEmail, { allowedTags: [], allowedAttributes: {} });
 
     try {
-        await db.query("UPDATE users SET username = ? WHERE id = ?", [sanitizedUsername, userId]);
+        await db.query("UPDATE users SET username = ?, email = ? WHERE id = ?", [sanitizedUsername, sanitizedEmail, userId]);
         res.json({ message: "Usuario actualizado con éxito." });
     } catch (err) {
         console.error("❌ [SERVER] Error al editar usuario:", err);
@@ -116,47 +119,54 @@ app.post("/change-status", async (req, res) => {
 
 // 📌 **Login con seguridad**
 app.post("/login", async (req, res) => {
-    console.log("📌 [SERVER] Se recibió una solicitud de login.");
-
     const { username, password } = req.body;
 
     if (!username || !password) {
-        console.warn("⚠️ [SERVER] Falta usuario o contraseña.");
         return res.status(400).json({ error: "Todos los campos son obligatorios." });
     }
 
     const sanitizedUsername = sanitizeHtml(username, { allowedTags: [], allowedAttributes: {} });
 
     try {
-        const [results] = await db.query("SELECT id, password_hash, role, status FROM users WHERE username = ?", [sanitizedUsername]);
+        const [results] = await db.query("SELECT id, password_hash, role, status, email FROM users WHERE username = ?", [sanitizedUsername]);
 
         if (results.length === 0) {
-            console.warn("⚠️ [SERVER] Usuario no encontrado.");
             return res.status(401).json({ error: "Usuario o contraseña incorrectos." });
         }
 
         const user = results[0];
 
         if (user.status === "inactivo") {
-            console.warn("⛔ [SERVER] Usuario inactivo.");
             return res.status(403).json({ error: "Tu cuenta está inactiva. Contacta con el administrador." });
         }
 
         const isValidPassword = await bcrypt.compare(password, user.password_hash);
-        
+
         if (!isValidPassword) {
-            console.warn("⚠️ [SERVER] Contraseña incorrecta.");
             return res.status(401).json({ error: "Usuario o contraseña incorrectos." });
         }
 
-        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        // Generar y enviar el código 2FA
+        const secret = speakeasy.generateSecret({ length: 20 });
+        const token = speakeasy.totp({
+            secret: secret.base32,
+            encoding: "base32"
+        });
 
-        console.log("✅ [SERVER] Token generado:", token);
+        // Guardar el secreto temporalmente (puedes usar una base de datos o caché)
+        await db.query("UPDATE users SET tempSecret = ? WHERE username = ?", [secret.base32, username]);
 
-        res.json({ message: "Login exitoso", token, role: user.role });
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: "Tu código de verificación",
+            text: `Tu código de verificación es: ${token}`
+        });
+
+        res.json({ message: "Código 2FA enviado. Verifica tu correo electrónico." });
 
     } catch (err) {
-        console.error("❌ [SERVER] Error al procesar el login:", err);
+        console.error("❌ Error al procesar el login:", err);
         res.status(500).json({ error: "Error interno del servidor." });
     }
 });
@@ -188,40 +198,64 @@ app.get("/verify-user", async (req, res) => {
 
 // 📌 **Registro con validaciones**
 app.post("/register", async (req, res) => {
-    const { username, password } = req.body;
-    const sanitizedUsername = sanitizeHtml(username, { allowedTags: [], allowedAttributes: {} });
+    const { username, password, email } = req.body;
 
-    if (!sanitizedUsername || !password) {
+    if (!username || !password || !email) {
         return res.status(400).json({ error: "Todos los campos son obligatorios." });
     }
 
-    // 🔹 Validar la seguridad de la contraseña
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-    const weakPasswords = ["admin", "password", "1234", "qwerty", "test", "abc123", "contraseña", "admin123", "123456","12345678",""];
+    const sanitizedUsername = sanitizeHtml(username, { allowedTags: [], allowedAttributes: {} });
+    const sanitizedEmail = sanitizeHtml(email, { allowedTags: [], allowedAttributes: {} });
 
-    if (!passwordRegex.test(password) || weakPasswords.includes(password.toLowerCase())) {
-        return res.status(400).json({ error: "La contraseña es demasiado débil. Usa al menos 8 caracteres con mayúsculas, minúsculas, números y símbolos." });
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await db.query("INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)", [sanitizedUsername, hashedPassword, sanitizedEmail]);
+
+        res.status(201).json({ message: "Usuario registrado exitosamente." });
+    } catch (err) {
+        console.error("❌ Error al registrar el usuario:", err);
+        res.status(500).json({ error: "Error interno del servidor." });
+    }
+});
+
+// Ruta para verificar el código 2FA
+app.post("/verify-2fa", async (req, res) => {
+    const { username, token } = req.body;
+
+    if (!username || !token) {
+        return res.status(400).json({ error: "Todos los campos son obligatorios." });
     }
 
     try {
-        // 🔹 Verificar si el usuario ya existe
-        const [existingUser] = await db.query("SELECT id FROM users WHERE username = ?", [sanitizedUsername]);
+        const [results] = await db.query("SELECT id, tempSecret, role FROM users WHERE username = ?", [username]);
 
-        if (existingUser.length > 0) {
-            return res.status(400).json({ error: "El usuario ya existe." });
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado." });
         }
 
-        // 🔹 Generar el hash de la contraseña
-        const salt = await bcrypt.genSalt(12);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const user = results[0];
+        const verified = speakeasy.totp.verify({
+            secret: user.tempSecret,
+            encoding: "base32",
+            token,
+            window: 3 // Permite una ventana de 1 intervalo de tiempo antes y después
+        });
 
-        // 🔹 Insertar usuario en la BD
-        await db.query("INSERT INTO users (username, password_hash, role, status) VALUES (?, ?, 'user', 'activo')", [sanitizedUsername, hashedPassword]);
+        if (!verified) {
+            return res.status(400).json({ error: "Código 2FA incorrecto." });
+        }
 
-        res.json({ message: "Usuario registrado con éxito." });
+        // Eliminar el secreto temporal después de la verificación
+        await db.query("UPDATE users SET tempSecret = NULL WHERE username = ?", [username]);
 
+        // Generar el JWT
+        const tokenPayload = { id: user.id, username, role: user.role };
+        const jwtToken = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: "1h" });
+
+        res.json({ message: "Código 2FA verificado.", token: jwtToken, role: user.role });
     } catch (err) {
-        console.error("❌ [SERVER] Error en el registro:", err);
+        console.error("❌ Error al verificar el código 2FA:", err);
         res.status(500).json({ error: "Error interno del servidor." });
     }
 });

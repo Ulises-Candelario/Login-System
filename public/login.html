@@ -12,7 +12,7 @@
 
 </head>
 <body>
-    <div class="container">
+    <div id="container">
         <h2>Iniciar Sesión</h2>
         <p id="error-message" class="error-message"></p>
         <input type="text" id="username" placeholder="Usuario">
@@ -20,6 +20,15 @@
         <div class="button-group">
             <button id="login-btn">Ingresar</button>
             <button id="register-btn">Registrarse</button>
+        </div>
+    </div>
+
+    <div id="2fa-section" style="display: none;">
+        <h2>Verificación 2FA</h2>
+        <p id="error-message" class="error-message"></p>
+        <input type="text" id="2fa-token" placeholder="Código 2FA">
+        <div class="button-group">
+            <button id="verify-2fa-btn">Verificar</button>
         </div>
     </div>
 
