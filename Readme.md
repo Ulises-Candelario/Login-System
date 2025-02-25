@@ -78,7 +78,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin', 'user') NOT NULL DEFAULT 'user',
     status ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
-    tempSecret VARCHAR(255);
+    tempSecret VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
