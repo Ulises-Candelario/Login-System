@@ -45,7 +45,7 @@ Crea un archivo llamado .env en la raíz del proyecto y agrega lo siguiente:
 
 ---
 
-## Configuración de la Base de Datos
+## Configuración de variables de entorno
 ```bash
 DB_HOST='TU HOST'
 DB_USER='USUARIO'
@@ -58,6 +58,10 @@ JWT_EXPIRATION='1h'
 
 # Puerto del Servidor
 PORT=3000
+
+#Datos correo
+EMAIL_USER = 'CORREO DESDE EL QUE SE ENVIARÁN LOS CÓDIGOS'
+EMAIL_PASS = 'TU CONTRASEÑA'
 ```
 
 ---
@@ -70,6 +74,7 @@ USE login_system;
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin', 'user') NOT NULL DEFAULT 'user',
     status ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
@@ -111,6 +116,7 @@ node -e "const bcrypt = require('bcryptjs'); bcrypt.hash('admin123', 12).then(co
  ┃   ┣ 📄 admin.js
  ┃   ┗ 📄 user.js
  ┣ 📄 server.js
+ ┣ 📄 mailer.js
  ┣ 📄 db.js
  ┣ 📄 .env
  ┣ 📄 .gitignore

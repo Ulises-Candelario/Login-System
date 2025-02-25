@@ -20,8 +20,9 @@ function isValidPassword(password) {
 async function register() {
     let username = document.getElementById("username").value.trim();
     let password = document.getElementById("password").value.trim();
+    let email = document.getElementById("email").value.trim();
 
-    if (username === "" || password === "") {
+    if (username === "" || password === "" || email === "") {
         document.getElementById("error-message").innerText = "Todos los campos son obligatorios.";
         return;
     }
@@ -40,7 +41,7 @@ async function register() {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password, email })
         });
 
         if (!response.ok) {

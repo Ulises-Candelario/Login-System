@@ -205,7 +205,8 @@ async function cargarUsuarios() {
 
             const row = document.createElement("tr");
             row.innerHTML = `
-                <td><input type="text" class="user-input" data-id="${user.id}" value="${sanitizeInput(user.username)}"></td>
+                <td><input type="text" id="username" class="user-input" data-id="${user.id}" value="${sanitizeInput(user.username)}"></td>
+                <td><input type="text" id="email" class="user-input" data-id="${user.id}" value="${sanitizeInput(user.email)}"></td>
                 <td>${user.role}</td>
                 <td>
                     <select class="status-select" data-id="${user.id}">
@@ -247,7 +248,9 @@ async function cargarUsuarios() {
 }
 
 async function editarUsuario(userId) {
-    const newUsername = sanitizeInput(document.querySelector(`.user-input[data-id='${userId}']`).value);
+    const newUsername = sanitizeInput(document.getElementById("username").value);
+    const newEmail = sanitizeInput(document.getElementById("email").value);
+
     try {
         const response = await fetch("http://localhost:3000/edit-user", {
             method: "POST",
@@ -255,7 +258,7 @@ async function editarUsuario(userId) {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${getToken()}`
             },
-            body: JSON.stringify({ userId, newUsername })
+            body: JSON.stringify({ userId, newUsername, newEmail })
         });
 
         const data = await response.json();
