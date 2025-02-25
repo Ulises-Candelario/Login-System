@@ -84,7 +84,7 @@ CREATE TABLE users (
 ```
 ## Insertar usuario admin (La contraseña debe ser reemplazada con un hash seguro)
 ```bash
-INSERT INTO users (username, email password_hash, role, status) 
+INSERT INTO users (username, email, password_hash, role, status) 
 VALUES ('admin', 'tucorreo@gmail.com', '$2b$12$ReemplazarConHashSeguro', 'admin', 'activo');
 ```
 ---
