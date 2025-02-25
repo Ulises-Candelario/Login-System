@@ -59,9 +59,12 @@ async function login() {
                 return;
             }
 
+            const expirationTime = Date.now() + 60 * 60 * 1000;
+
             // Almacenar el JWT en localStorage
             localStorage.setItem("token", verifyData.token);
             localStorage.setItem("role", verifyData.role);
+            localStorage.setItem("token_expiration", expirationTime);
 
             // Redirigir según el rol
             if (verifyData.role === "admin") {

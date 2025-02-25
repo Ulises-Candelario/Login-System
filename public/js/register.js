@@ -2,7 +2,7 @@ console.log("Script cargado correctamente");
 
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("register-btn").addEventListener("click", register);
-    document.getElementById("login-btn").addEventListener("click", goToLogin);
+    // document.getElementById("login-btn").addEventListener("click", goToLogin);
 });
 
 function sanitizeInput(input) {
